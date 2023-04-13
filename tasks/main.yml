@@ -1,0 +1,54 @@
+---
+# tasks file for keystone
+
+- name: "Install keystone"
+  apt:
+    name: "keystone"
+    state: "present"
+
+- name: "Push keystone config"
+  template:
+    src: "keystone.conf.j2"
+    dest: "/etc/keystone/keystone.conf"
+    owner: "root"
+    group: "root"
+    mode: "0644"
+
+- name: "Check if keystone was already bootstrapped from database"
+  # check if tables exist in database with ansible module
+  mysql_query:
+    login_db: "{{ keystone_db_name }}"
+    login_host: "{{ keystone_db_host }}"
+    login_user: "{{ keystone_db_user }}"
+    login_password: "{{ keystone_db_pass }}"
+    query: show tables
+  register: "keystone_db_info"
+
+- name: Run Keystone database sync
+  command: su -s /bin/sh -c "keystone-manage db_sync" keystone
+  register: keystone_db_sync_check
+  failed_when: "keystone_db_sync_check.rc == 1"
+  changed_when: "keystone_db_sync_check.rc not in [2, 3, 4]"
+  when: keystone_db_info.rowcount | length == 0
+
+- name: "fernet_setup"
+  command: keystone-manage fernet_setup --keystone-user keystone --keystone-group keystone
+  when: keystone_db_info.rowcount | length == 0
+
+- name: "credential_setup"
+  command: keystone-manage credential_setup --keystone-user keystone --keystone-group keystone
+  when: keystone_db_info.rowcount | length == 0
+
+- name: "Bootstrap"
+  command: keystone-manage bootstrap \
+    --bootstrap-password {{ keystone_admin_password }} \
+    --bootstrap-admin-url {{ bootstrap_admin_url }} \
+    --bootstrap-internal-url {{ bootstrap_internal_url }} \
+    --bootstrap-public-url {{ bootstrap_public_url }} \
+    --bootstrap-region-id {{ keystone_region_id}}
+  when: keystone_db_info.rowcount | length == 0
+
+- name: "Restart keystone"
+  service:
+    name: "apache2"
+    state: "restarted"

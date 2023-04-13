@@ -1,0 +1,18 @@
+---
+# defaults file for keystone
+keystone_db_host: "localhost"
+keystone_db_name: "keystone"
+keystone_db_user: "keystone"
+keystone_db_pass: "keystone"
+
+keystone_db_connection: "mysql+pymysql://{{ keystone_db_user }}:{{ keystone_db_pass }}@{{ keystone_db_host }}/{{ keystone_db_name }}"
+
+keystone_token_provider: "fernet"
+
+keystone_region_id: "RegionOne"
+
+keystone_admin_password: "admin"
+
+bootstrap_admin_url: "http://{{ ansible_fqdn }}:35357/v3/"
+bootstrap_internal_url: "http://{{ ansible_fqdn }}:5000/v3/"
+bootstrap_public_url: "http://{{ ansible_fqdn }}:5000/v3/"
