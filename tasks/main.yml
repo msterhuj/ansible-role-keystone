@@ -24,20 +24,24 @@
     query: show tables
   register: "keystone_db_info"
 
+- name: "debug"
+  debug:
+    msg: "{{ keystone_db_info.query_result.0 | length }}"
+
 - name: Run Keystone database sync
   command: su -s /bin/sh -c "keystone-manage db_sync" keystone
   register: keystone_db_sync_check
   failed_when: "keystone_db_sync_check.rc == 1"
   changed_when: "keystone_db_sync_check.rc not in [2, 3, 4]"
-  when: keystone_db_info.rowcount | length == 0
+  when: keystone_db_info.query_result.0 | length  == 0
 
 - name: "fernet_setup"
   command: keystone-manage fernet_setup --keystone-user keystone --keystone-group keystone
-  when: keystone_db_info.rowcount | length == 0
+  when: keystone_db_info.query_result.0 | length == 0
 
 - name: "credential_setup"
   command: keystone-manage credential_setup --keystone-user keystone --keystone-group keystone
-  when: keystone_db_info.rowcount | length == 0
+  when: keystone_db_info.query_result.0 | length  == 0
 
 - name: "Bootstrap"
   command: keystone-manage bootstrap \
@@ -46,7 +50,7 @@
     --bootstrap-internal-url {{ bootstrap_internal_url }} \
     --bootstrap-public-url {{ bootstrap_public_url }} \
     --bootstrap-region-id {{ keystone_region_id}}
-  when: keystone_db_info.rowcount | length == 0
+  when: keystone_db_info.query_result.0 | length  == 0
 
 - name: "Restart keystone"
   service:
