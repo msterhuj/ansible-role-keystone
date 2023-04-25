@@ -410,12 +410,12 @@ log_dir = /var/log/keystone
 # dogpile.cache.memory - <No description provided>
 # dogpile.cache.memory_pickle - <No description provided>
 # dogpile.cache.null - <No description provided>
-#backend = dogpile.cache.null
+backend = {{ keystone_cache_backend }}
 
 # Arguments supplied to the backend module. Specify this option once per
 # argument to be passed to the dogpile.cache backend. Example format:
 # "<argname>:<value>". (multi valued)
-#backend_argument =
+backend_argument = {{ keystone_cache_backend_argument }}
 
 # Proxy classes to import that will affect the way the dogpile.cache backend
 # functions. See the dogpile.cache documentation on changing-backend-behavior.
@@ -423,7 +423,7 @@ log_dir = /var/log/keystone
 #proxies =
 
 # Global toggle for caching. (boolean value)
-#enabled = true
+enabled = {{ keystone_cache_enabled }}
 
 # Extra debugging from the cache backend (cache keys, get/set/delete/etc
 # calls). This is only really useful if you need to see the specific cache-

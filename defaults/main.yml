@@ -16,3 +16,7 @@ keystone_admin_password: "admin"
 bootstrap_admin_url: "http://{{ ansible_fqdn }}:35357/v3/"
 bootstrap_internal_url: "http://{{ ansible_fqdn }}:5000/v3/"
 bootstrap_public_url: "http://{{ ansible_fqdn }}:5000/v3/"
+
+keystone_cache_enabled: true
+keystone_cache_backend: "dogpile.cache.null"
+keystone_cache_backend_argument: "url:127.0.0.1:11211"
